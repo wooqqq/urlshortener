@@ -4,6 +4,8 @@ import com.wooqqq.urlshortener.domain.url.dto.UrlCreateRequest;
 import com.wooqqq.urlshortener.domain.url.dto.UrlResponse;
 import com.wooqqq.urlshortener.domain.url.entity.Url;
 import com.wooqqq.urlshortener.domain.url.repository.UrlRepository;
+import com.wooqqq.urlshortener.global.exception.BusinessException;
+import com.wooqqq.urlshortener.global.exception.ErrorCode;
 import com.wooqqq.urlshortener.global.util.Base62Encoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,10 +35,10 @@ public class UrlService {
 
     public String getOriginalUrl(String shortKey) {
         Url url = urlRepository.findByShortKey(shortKey)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단축 URL입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.URL_NOT_FOUND));
 
         if (url.isExpired()) {
-            throw new IllegalArgumentException("만료된 단축 URL입니다.");
+            throw new BusinessException(ErrorCode.URL_EXPIRED);
         }
 
         return url.getOriginalUrl();
@@ -45,7 +47,7 @@ public class UrlService {
     @Transactional
     public UrlResponse getUrlInfo(String shortKey) {
         Url url = urlRepository.findByShortKey(shortKey)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단축 URL입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.URL_NOT_FOUND));
 
         url.incrementClickCount();
         return UrlResponse.from(url);
