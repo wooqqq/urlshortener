@@ -1,4 +1,4 @@
-package com.yourname.urlshortener.domain.url.entity;
+package com.wooqqq.urlshortener.domain.url.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

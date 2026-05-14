@@ -1,4 +1,4 @@
-package com.yourname.urlshortener;
+package com.wooqqq.urlshortener;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
