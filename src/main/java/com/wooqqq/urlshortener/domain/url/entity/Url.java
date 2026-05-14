@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Url {
 
     @Id
@@ -55,4 +57,7 @@ public class Url {
        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
    }
 
+   public void updateShortKey(String shortKey) {
+       this.shortKey = shortKey;
+   }
 }
