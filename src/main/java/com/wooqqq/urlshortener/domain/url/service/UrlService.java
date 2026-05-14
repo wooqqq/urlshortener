@@ -3,6 +3,7 @@ package com.wooqqq.urlshortener.domain.url.service;
 import com.wooqqq.urlshortener.domain.url.dto.UrlCreateRequest;
 import com.wooqqq.urlshortener.domain.url.dto.UrlResponse;
 import com.wooqqq.urlshortener.domain.url.entity.Url;
+import com.wooqqq.urlshortener.domain.url.repository.UrlCacheRepository;
 import com.wooqqq.urlshortener.domain.url.repository.UrlRepository;
 import com.wooqqq.urlshortener.global.exception.BusinessException;
 import com.wooqqq.urlshortener.global.exception.ErrorCode;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UrlService {
 
     private final UrlRepository urlRepository;
+    private final UrlCacheRepository urlCacheRepository;
 
     @Transactional
     public UrlResponse createShortUrl(UrlCreateRequest request) {
@@ -30,18 +32,24 @@ public class UrlService {
         String shortKey = Base62Encoder.encode(saved.getId());
         saved.updateShortKey(shortKey);
 
+        urlCacheRepository.save(shortKey, saved.getOriginalUrl());
+
         return UrlResponse.from(saved);
     }
 
     public String getOriginalUrl(String shortKey) {
-        Url url = urlRepository.findByShortKey(shortKey)
-                .orElseThrow(() -> new BusinessException(ErrorCode.URL_NOT_FOUND));
+        return urlCacheRepository.find(shortKey)
+                .orElseGet(() -> {
+                    Url url = urlRepository.findByShortKey(shortKey)
+                            .orElseThrow(() -> new BusinessException(ErrorCode.URL_NOT_FOUND));
 
-        if (url.isExpired()) {
-            throw new BusinessException(ErrorCode.URL_EXPIRED);
-        }
+                    if (url.isExpired()) {
+                        throw new BusinessException(ErrorCode.URL_EXPIRED);
+                    }
 
-        return url.getOriginalUrl();
+                    urlCacheRepository.save(shortKey, url.getOriginalUrl());
+                    return url.getOriginalUrl();
+                });
     }
 
     @Transactional
