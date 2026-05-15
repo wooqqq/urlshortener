@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/urls")
@@ -26,13 +24,5 @@ public class UrlController {
     @GetMapping("/{shortKey}")
     public ResponseEntity<UrlResponse> getUrlInfo(@PathVariable String shortKey) {
         return ResponseEntity.ok(urlService.getUrlInfo(shortKey));
-    }
-
-    @GetMapping("/{shortKey}/redirect")
-    public ResponseEntity<UrlResponse> redirect(@PathVariable String shortKey) {
-        String originalUrl = urlService.getOriginalUrl(shortKey);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(originalUrl))
-                .build();
     }
 }

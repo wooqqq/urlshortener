@@ -115,7 +115,7 @@
             }
 
             const data = await response.json();
-            const short = `${window.location.origin}/api/urls/${data.shortKey}/redirect`;
+            const short = `${window.location.origin}/${data.shortKey}`;
             shortUrlEl.href = short;
             shortUrlEl.textContent = short;
             resultBox.style.display = 'block';
