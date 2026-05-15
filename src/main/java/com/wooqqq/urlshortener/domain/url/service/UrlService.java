@@ -7,7 +7,7 @@ import com.wooqqq.urlshortener.domain.url.repository.UrlCacheRepository;
 import com.wooqqq.urlshortener.domain.url.repository.UrlRepository;
 import com.wooqqq.urlshortener.global.exception.BusinessException;
 import com.wooqqq.urlshortener.global.exception.ErrorCode;
-import com.wooqqq.urlshortener.global.util.Base62Encoder;
+import com.wooqqq.urlshortener.global.util.ShortKeyGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,19 +22,15 @@ public class UrlService {
 
     @Transactional
     public UrlResponse createShortUrl(UrlCreateRequest request) {
+        String shortKey = generateUniqueShortKey();
+
         Url url = Url.builder()
-                .shortKey("temp")
+                .shortKey(shortKey)
                 .originalUrl(request.getOriginalUrl())
                 .expiresAt(request.getExpiresAt())
                 .build();
 
-        Url saved = urlRepository.save(url);
-        String shortKey = Base62Encoder.encode(saved.getId());
-        saved.updateShortKey(shortKey);
-
-        urlCacheRepository.save(shortKey, saved.getOriginalUrl());
-
-        return UrlResponse.from(saved);
+        return UrlResponse.from(urlRepository.save(url));
     }
 
     public String getOriginalUrl(String shortKey) {
@@ -59,5 +55,13 @@ public class UrlService {
 
         url.incrementClickCount();
         return UrlResponse.from(url);
+    }
+
+    private String generateUniqueShortKey() {
+        String shortKey;
+        do {
+            shortKey = ShortKeyGenerator.generate();
+        } while (urlRepository.existsByShortKey(shortKey));
+        return shortKey;
     }
 }

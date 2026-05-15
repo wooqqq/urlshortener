@@ -56,8 +56,4 @@ public class Url {
    public boolean isExpired() {
        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
    }
-
-   public void updateShortKey(String shortKey) {
-       this.shortKey = shortKey;
-   }
 }
